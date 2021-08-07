@@ -1,6 +1,7 @@
 package casbinpgadapter
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/casbin/casbin/v2"
@@ -9,16 +10,15 @@ import (
 	"github.com/nrfta/go-casbin-pg-adapter/pkg/model"
 )
 
+const casbinTestDBName = "casbin_unittest"
+
 // TestAdapter is a very bad all-in-one integration test to test the adapter
 func TestAdapter(t *testing.T) {
-	db, err := pghelpers.ConnectPostgres(pghelpers.PostgresConfig{
-		Host:       "localhost",
-		Port:       5432,
-		Username:   "postgres",
-		Password:   "pgpassword",
-		Database:   "casbin_unittest",
-		SSLEnabled: false,
-	})
+	err := ensureDBExists()
+	if err != nil {
+		t.Fatalf("Fail to ensure DB %v", err)
+	}
+	db, err := openDBConnections(casbinTestDBName)
 	if err != nil {
 		t.Fatalf("Fail to open db %v", err)
 		return
@@ -121,14 +121,7 @@ func TestAdapter(t *testing.T) {
 
 // TestAdapter is a very bad all-in-one integration test to test the adapter
 func TestFilteredAdapter(t *testing.T) {
-	db, err := pghelpers.ConnectPostgres(pghelpers.PostgresConfig{
-		Host:       "localhost",
-		Port:       5432,
-		Username:   "postgres",
-		Password:   "pgpassword",
-		Database:   "casbin_unittest",
-		SSLEnabled: false,
-	})
+	db, err := openDBConnections(casbinTestDBName)
 	if err != nil {
 		t.Fatalf("Fail to open db %v", err)
 		return
@@ -186,4 +179,24 @@ func TestFilteredAdapter(t *testing.T) {
 		t.Fatalf("Want %v but got %v", want, enforcerPolicy)
 		return
 	}
+}
+
+func openDBConnections(dbName string) (*sql.DB, error) {
+	return pghelpers.ConnectPostgres(pghelpers.PostgresConfig{
+		Host:       "localhost",
+		Port:       5432,
+		Username:   "postgres",
+		Password:   "pgpassword",
+		Database:   dbName,
+		SSLEnabled: false,
+	})
+}
+
+func ensureDBExists() error {
+	db, err := openDBConnections("postgres")
+	if err != nil {
+		return err
+	}
+	db.Exec("CREATE DATABASE " + casbinTestDBName)
+	return nil
 }
