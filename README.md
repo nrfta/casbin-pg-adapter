@@ -3,54 +3,56 @@
 Casbin Postgres Adapter is the postgres adapter for [Casbin](Casbin)
 
 ## Installation
+
 ```sh
 $ go get github.com/nrfta/go-casbin-pg-adapter
 ```
 
 ## Example
+
 ```go
 package main
 
 import (
-  "database/sql"
-  "os"
+	"database/sql"
+	"os"
 
-  "github.com/casbin/casbin/v2"
-  "github.com/nrfta/go-casbin-pg-adapter"
+	"github.com/casbin/casbin/v2"
+	"github.com/nrfta/go-casbin-pg-adapter"
 )
 
 func main() {
-  connectionString := "postgresql://postgres:@localhost:5432/postgres?sslmode=disable"
-  db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-  if err != nil {
-    panic(err)
-  }
+	connectionString := "postgresql://postgres:@localhost:5432/postgres?sslmode=disable"
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
+	}
 
-  tableName := "casbin"
-  adapter, err := casbinpgadapter.NewAdapter(db, tableName)
-  // If you are using db schema
-  // myDBSchema := "mySchema"
-  // adapter, err := casbinpgadapter.NewAdapterWithDBSchema(db, myDBSchema, tableName)
-  if err != nil {
-    panic(err)
-  }
+	tableName := "casbin"
+	adapter, err := casbinpgadapter.NewAdapter(db, tableName)
+	// If you are using db schema
+	// myDBSchema := "mySchema"
+	// adapter, err := casbinpgadapter.NewAdapterWithDBSchema(db, myDBSchema, tableName)
+	if err != nil {
+		panic(err)
+	}
 
-  enforcer, err := casbin.NewEnforcer("./examples/model.conf", adapter)
-  if err != nil {
-    panic(err)
-  }
+	enforcer, err := casbin.NewEnforcer("./examples/model.conf", adapter)
+	if err != nil {
+		panic(err)
+	}
 
-  // Load stored policy from database
-  enforcer.LoadPolicy()
+	// Load stored policy from database
+	enforcer.LoadPolicy()
 
-  // Do permission checking
-  enforcer.Enforce("alice", "data1", "write")
+	// Do permission checking
+	enforcer.Enforce("alice", "data1", "write")
 
-  // Do some mutations
-  enforcer.AddPolicy("alice", "data2", "write")
-  enforcer.RemovePolicy("alice", "data1", "write")
+	// Do some mutations
+	enforcer.AddPolicy("alice", "data2", "write")
+	enforcer.RemovePolicy("alice", "data1", "write")
 
-  // Persist policy to database
-  enforcer.SavePolicy()
+	// Persist policy to database
+	enforcer.SavePolicy()
 }
 ```

@@ -15,6 +15,7 @@ type FilteredAdapter struct {
 	*Adapter
 	filtered bool
 }
+
 var _ = persist.FilteredAdapter(&FilteredAdapter{})
 
 // NewFilteredAdapter is the constructor for FilteredAdapter.
@@ -41,7 +42,6 @@ func (a *FilteredAdapter) LoadPolicy(model casbinModel.Model) error {
 
 // LoadFilteredPolicy loads only policy rules that match the filter.
 func (a *FilteredAdapter) LoadFilteredPolicy(mod casbinModel.Model, filter interface{}) error {
-	mod.ClearPolicy()
 	if filter == nil {
 		return a.LoadPolicy(mod)
 	}

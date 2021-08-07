@@ -22,6 +22,7 @@ type Adapter struct {
 	tableName            string
 	casbinRuleRepository *repository.CasbinRuleRepository
 }
+
 var _ = persist.Adapter(&Adapter{})
 var _ = persist.BatchAdapter(&Adapter{})
 

@@ -1,18 +1,24 @@
 package casbinpgadapter
 
 import (
-	"database/sql"
-	"os"
 	"testing"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/util"
+	"github.com/neighborly/go-pghelpers"
 	"github.com/nrfta/go-casbin-pg-adapter/pkg/model"
 )
 
 // TestAdapter is a very bad all-in-one integration test to test the adapter
 func TestAdapter(t *testing.T) {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	db, err := pghelpers.ConnectPostgres(pghelpers.PostgresConfig{
+		Host:       "localhost",
+		Port:       5432,
+		Username:   "postgres",
+		Password:   "pgpassword",
+		Database:   "casbin_unittest",
+		SSLEnabled: false,
+	})
 	if err != nil {
 		t.Fatalf("Fail to open db %v", err)
 		return
@@ -115,7 +121,14 @@ func TestAdapter(t *testing.T) {
 
 // TestAdapter is a very bad all-in-one integration test to test the adapter
 func TestFilteredAdapter(t *testing.T) {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	db, err := pghelpers.ConnectPostgres(pghelpers.PostgresConfig{
+		Host:       "localhost",
+		Port:       5432,
+		Username:   "postgres",
+		Password:   "pgpassword",
+		Database:   "casbin_unittest",
+		SSLEnabled: false,
+	})
 	if err != nil {
 		t.Fatalf("Fail to open db %v", err)
 		return
