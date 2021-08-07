@@ -11,8 +11,8 @@ import (
 	// no-lint
 	_ "github.com/lib/pq"
 
-	"github.com/cychiuae/casbin-pg-adapter/pkg/model"
-	"github.com/cychiuae/casbin-pg-adapter/pkg/repository"
+	"github.com/nrfta/casbin-pg-adapter/pkg/model"
+	"github.com/nrfta/casbin-pg-adapter/pkg/repository"
 )
 
 // Adapter is a postgresql adaptor for casbin
@@ -22,6 +22,8 @@ type Adapter struct {
 	tableName            string
 	casbinRuleRepository *repository.CasbinRuleRepository
 }
+var _ = persist.Adapter(&Adapter{})
+var _ = persist.BatchAdapter(&Adapter{})
 
 // NewAdapter returns a new casbin postgresql adapter
 func NewAdapter(db *sql.DB, tableName string) (*Adapter, error) {
@@ -145,6 +147,17 @@ func (adapter *Adapter) AddPolicy(sec string, ptype string, rule []string) error
 	return err
 }
 
+// AddPolicies adds policy rules to the storage.
+// This is part of the Auto-Save feature.
+func (adapter *Adapter) AddPolicies(sec string, ptype string, rules [][]string) error {
+	for _, rule := range rules {
+		if err := adapter.AddPolicy(sec, ptype, rule); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // RemovePolicy removes a policy rule from the storage.
 // This is part of the Auto-Save feature.
 func (adapter *Adapter) RemovePolicy(sec string, ptype string, rule []string) error {
@@ -159,4 +172,15 @@ func (adapter *Adapter) RemoveFilteredPolicy(sec string, ptype string, fieldInde
 	casbinRule := model.NewCasbinRuleFromPTypeAndFilter(ptype, fieldIndex, fieldValues...)
 	err := adapter.casbinRuleRepository.DeleteCasbinRule(casbinRule)
 	return err
+}
+
+// RemovePolicies removes policy rules from the storage.
+// This is part of the Auto-Save feature.
+func (adapter *Adapter) RemovePolicies(sec string, ptype string, rules [][]string) error {
+	for _, rule := range rules {
+		if err := adapter.RemovePolicy(sec, ptype, rule); err != nil {
+			return err
+		}
+	}
+	return nil
 }

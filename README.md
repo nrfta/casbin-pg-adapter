@@ -4,7 +4,7 @@ Casbin Postgres Adapter is the postgres adapter for [Casbin](Casbin)
 
 ## Installation
 ```sh
-$ go get github.com/cychiuae/casbin-pg-adapter
+$ go get github.com/nrfta/casbin-pg-adapter
 ```
 
 ## Example
@@ -16,7 +16,7 @@ import (
   "os"
 
   "github.com/casbin/casbin/v2"
-  "github.com/cychiuae/casbin-pg-adapter"
+  "github.com/nrfta/casbin-pg-adapter"
 )
 
 func main() {

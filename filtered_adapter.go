@@ -5,7 +5,8 @@ import (
 	"errors"
 
 	casbinModel "github.com/casbin/casbin/v2/model"
-	"github.com/cychiuae/casbin-pg-adapter/pkg/model"
+	"github.com/casbin/casbin/v2/persist"
+	"github.com/nrfta/casbin-pg-adapter/pkg/model"
 )
 
 // FilteredAdapter is the filtered file adapter for Casbin. It can load policy
@@ -14,6 +15,7 @@ type FilteredAdapter struct {
 	*Adapter
 	filtered bool
 }
+var _ = persist.FilteredAdapter(&FilteredAdapter{})
 
 // NewFilteredAdapter is the constructor for FilteredAdapter.
 func NewFilteredAdapter(db *sql.DB, tableName string) (*FilteredAdapter, error) {
