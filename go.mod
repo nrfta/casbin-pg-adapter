@@ -1,4 +1,4 @@
-module github.com/nrfta/casbin-pg-adapter
+module github.com/nrfta/go-casbin-pg-adapter
 
 go 1.14
 

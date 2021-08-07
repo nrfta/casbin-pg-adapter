@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'v*'
+  pull_request: {}
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pgpassword
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+      redis:
+        image: bitnami/redis:latest
+        env:
+          REDIS_PASSWORD: password
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli -a password ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14.x
+
+      - name: granting private modules access
+        run: |
+          git config --global url."https://${{ secrets.GO_MODULES_TOKEN }}:x-oauth-basic@github.com/nrfta".insteadOf "https://github.com/nrfta"
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Tests
+        run: go test -v ./...

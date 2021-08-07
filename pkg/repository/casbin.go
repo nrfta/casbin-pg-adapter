@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nrfta/casbin-pg-adapter/pkg/model"
+	"github.com/nrfta/go-casbin-pg-adapter/pkg/model"
 )
 
 // CasbinRuleRepository is the bridge for adapter and db

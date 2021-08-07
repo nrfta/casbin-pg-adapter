@@ -6,7 +6,7 @@ import (
 
 	casbinModel "github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/nrfta/casbin-pg-adapter/pkg/model"
+	"github.com/nrfta/go-casbin-pg-adapter/pkg/model"
 )
 
 // FilteredAdapter is the filtered file adapter for Casbin. It can load policy
