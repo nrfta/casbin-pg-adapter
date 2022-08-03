@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION %[1]s.has_access (
             WHERE r.p_type = 'p'
                 AND (r.v0 = user_id OR r.v0 = roles.role OR (r.v0 = 'USER' AND roles.role = 'ADMIN'))
                 AND (r.v1 = domain OR (position('*' in r.v1) > 0 AND starts_with(domain, rtrim(r.v1, '*'))))
-                AND r.v2 = ANY(resources)
+                AND r.v2 LIKE ANY(resources)
                 AND (r.v3 = '*' OR r.v3 = action OR (r.v3 = 'update' AND action = 'read'))
         );
     END;
