@@ -43,8 +43,10 @@ func Migrate(schemaName, tableName string, db *sql.DB) error {
 			return txErr
 		}
 
-		if txErr = insertVersion(schemaName, ver, false, db); txErr != nil {
-			return txErr
+		if ver > 0 {
+			if txErr = insertVersion(schemaName, ver, false, db); txErr != nil {
+				return txErr
+			}
 		}
 
 		ver++
@@ -58,10 +60,10 @@ func getLatest(schemaName string, db *sql.DB) (int, error) {
 	var exists bool
 	err := db.QueryRow(query, schemaName).Scan(&exists)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 	if !exists {
-		return 0, nil
+		return -1, nil
 	}
 
 	const query2 = `SELECT MAX(version) FROM %s.migrations`
@@ -71,7 +73,7 @@ func getLatest(schemaName string, db *sql.DB) (int, error) {
 		if err.Error() == `sql: Scan error on column index 0, name "max": converting NULL to int is unsupported` {
 			return 1, nil
 		}
-		return -1, err
+		return 0, err
 	}
 	return latest, nil
 }

@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS idx_%[2]s_%[3]s ON "%[1]s"."%[2]s" (%[3]s)
 `
 
 func init() {
-	migrationFuncs[3] = func(schemaName, tableName string, tx *sql.Tx) error {
+	migrationFuncs[2] = func(schemaName, tableName string, tx *sql.Tx) error {
 		if _, err := tx.Exec(fmt.Sprintf(casbinRulesTable, schemaName, tableName)); err != nil {
 			return err
 		}

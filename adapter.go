@@ -41,7 +41,7 @@ func NewAdapterWithDBSchema(db *sql.DB, dbSchema string, tableName string) (*Ada
 	}
 
 	if err := migrations.Migrate(adapter.dbSchema, adapter.tableName, adapter.db); err != nil {
-		log.Println("casbin pg migrations filed:", err)
+		log.Println("casbin pg migrations failed:", err)
 		return nil, err
 	}
 

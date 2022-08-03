@@ -38,7 +38,7 @@ PARALLEL SAFE;
 `
 
 func init() {
-	migrationFuncs[4] = func(schemaName, tableName string, tx *sql.Tx) error {
+	migrationFuncs[3] = func(schemaName, tableName string, tx *sql.Tx) error {
 		if _, err := tx.Exec(fmt.Sprintf(hasAccessFunction, schemaName)); err != nil {
 			return err
 		}
