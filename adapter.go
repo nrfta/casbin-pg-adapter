@@ -96,6 +96,12 @@ func (adapter *Adapter) createTableIfNeeded() error {
 			return err
 		}
 	}
+	_, err = tx.Exec(hasAccessFunction)
+	if err != nil {
+		log.Printf("Cannot create has_access function")
+		_ = tx.Rollback()
+		return err
+	}
 	err = tx.Commit()
 	if err != nil {
 		log.Printf("Cannot commit transaction %v", err)
