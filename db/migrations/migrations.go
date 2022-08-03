@@ -35,7 +35,7 @@ func Migrate(schemaName, tableName string, db *sql.DB) error {
 		}
 		if txErr != nil {
 			if ver > 1 {
-				err2 := insertVersion(ver, true, db)
+				err2 := insertVersion(schemaName, ver, true, db)
 				if err2 != nil {
 					txErr = errors.Wrap(txErr, err2.Error())
 				}
@@ -43,7 +43,7 @@ func Migrate(schemaName, tableName string, db *sql.DB) error {
 			return txErr
 		}
 
-		if txErr = insertVersion(ver, false, db); txErr != nil {
+		if txErr = insertVersion(schemaName, ver, false, db); txErr != nil {
 			return txErr
 		}
 
@@ -76,8 +76,8 @@ func getLatest(schemaName string, db *sql.DB) (int, error) {
 	return latest, nil
 }
 
-func insertVersion(ver int, fail bool, db *sql.DB) error {
-	const query = `INSERT INTO migrations (version, applied_at, failed) VALUES ($1, $2, $3)`
-	_, err := db.Exec(query, ver, time.Now(), fail)
+func insertVersion(schemaName string, ver int, fail bool, db *sql.DB) error {
+	const query = `INSERT INTO %s.migrations (version, applied_at, failed) VALUES ($1, $2, $3)`
+	_, err := db.Exec(fmt.Sprintf(query, schemaName), ver, time.Now(), fail)
 	return err
 }
