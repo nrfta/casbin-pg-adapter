@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION %[1]s.has_access (
                 FROM %[1]s.casbin_rules
                 WHERE p_type = 'g'
                   AND v0 = user_id
-                  AND v2 = domain
+                  AND (v2 = domain OR v2 = '*')
             )
             SELECT *
             FROM %[1]s.casbin_rules r
