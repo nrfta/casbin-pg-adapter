@@ -1,7 +1,7 @@
 package casbinpgadapter
 
 const hasAccessFunction = `
-CREATE OR REPLACE FUNCTION access_management.has_access (
+CREATE OR REPLACE FUNCTION SCHEMA.has_access (
 	IN user_id text,
 	IN domain text,
 	IN resources text[],
@@ -11,13 +11,13 @@ CREATE OR REPLACE FUNCTION access_management.has_access (
         RETURN EXISTS(
             WITH roles AS (
                 SELECT v1 as role
-                FROM access_management.casbin_rules
+                FROM SCHEMA.casbin_rules
                 WHERE p_type = 'g'
                   AND v0 = user_id
                   AND v2 = domain
             )
             SELECT *
-            FROM access_management.casbin_rules r
+            FROM SCHEMA.casbin_rules r
             LEFT JOIN roles ON r.v0 = roles.role
             WHERE r.p_type = 'p'
                 AND (r.v0 = user_id OR r.v0 = roles.role OR (r.v0 = 'USER' AND roles.role = 'ADMIN'))

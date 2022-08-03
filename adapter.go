@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 
 	casbinModel "github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
@@ -96,7 +97,7 @@ func (adapter *Adapter) createTableIfNeeded() error {
 			return err
 		}
 	}
-	_, err = tx.Exec(hasAccessFunction)
+	_, err = tx.Exec(strings.ReplaceAll(hasAccessFunction, "SCHEMA", adapter.dbSchema))
 	if err != nil {
 		log.Printf("Cannot create has_access function")
 		_ = tx.Rollback()
