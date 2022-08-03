@@ -2,13 +2,11 @@ package casbinpgadapter
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
-	"strings"
 
 	casbinModel "github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
-
+	"github.com/nrfta/go-casbin-pg-adapter/db/migrations"
 	// no-lint
 	_ "github.com/lib/pq"
 
@@ -42,74 +40,12 @@ func NewAdapterWithDBSchema(db *sql.DB, dbSchema string, tableName string) (*Ada
 		casbinRuleRepository,
 	}
 
-	if err := adapter.setup(); err != nil {
+	if err := migrations.Migrate(adapter.dbSchema, adapter.tableName, adapter.db); err != nil {
+		log.Println("casbin pg migrations filed:", err)
 		return nil, err
 	}
 
 	return adapter, nil
-}
-
-func (adapter *Adapter) setup() error {
-	if err := adapter.createTableIfNeeded(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (adapter *Adapter) createTableIfNeeded() error {
-	tx, err := adapter.db.Begin()
-	if err != nil {
-		log.Print("Cannot start transaction")
-		return err
-	}
-	_, err = tx.Exec(fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS "%s"."%s" (
-			p_type varchar(256) not null default '',
-			v0 		varchar(256) not null default '',
-			v1 		varchar(256) not null default '',
-			v2 		varchar(256) not null default '',
-			v3 		varchar(256) not null default '',
-			v4 		varchar(256) not null default '',
-			v5 		varchar(256) not null default ''
-		)
-	`, adapter.dbSchema, adapter.tableName))
-	if err != nil {
-		_ = tx.Rollback()
-		log.Printf("Cannot create table %v", err)
-		return err
-	}
-	columns := [7]string{
-		"p_type",
-		"v0",
-		"v1",
-		"v2",
-		"v3",
-		"v4",
-		"v5",
-	}
-	for _, column := range columns {
-		_, err = tx.Exec(fmt.Sprintf(`
-			CREATE INDEX IF NOT EXISTS idx_%[2]s_%[3]s ON "%[1]s"."%[2]s" (%[3]s)
-		`, adapter.dbSchema, adapter.tableName, column))
-		if err != nil {
-			log.Printf("Cannot create index for column: %v. Error: %v", column, err)
-			_ = tx.Rollback()
-			return err
-		}
-	}
-	_, err = tx.Exec(strings.ReplaceAll(hasAccessFunction, "SCHEMA", adapter.dbSchema))
-	if err != nil {
-		log.Printf("Cannot create has_access function")
-		_ = tx.Rollback()
-		return err
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Printf("Cannot commit transaction %v", err)
-		_ = tx.Rollback()
-		return err
-	}
-	return nil
 }
 
 // LoadPolicy loads all policy rules from the storage.

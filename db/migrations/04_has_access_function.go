@@ -1,7 +1,12 @@
-package casbinpgadapter
+package migrations
+
+import (
+	"database/sql"
+	"fmt"
+)
 
 const hasAccessFunction = `
-CREATE OR REPLACE FUNCTION SCHEMA.has_access (
+CREATE OR REPLACE FUNCTION %[1]s.has_access (
 	IN user_id text,
 	IN domain text,
 	IN resources text[],
@@ -11,13 +16,13 @@ CREATE OR REPLACE FUNCTION SCHEMA.has_access (
         RETURN EXISTS(
             WITH roles AS (
                 SELECT v1 as role
-                FROM SCHEMA.casbin_rules
+                FROM %[1]s.casbin_rules
                 WHERE p_type = 'g'
                   AND v0 = user_id
                   AND v2 = domain
             )
             SELECT *
-            FROM SCHEMA.casbin_rules r
+            FROM %[1]s.casbin_rules r
             LEFT JOIN roles ON r.v0 = roles.role
             WHERE r.p_type = 'p'
                 AND (r.v0 = user_id OR r.v0 = roles.role OR (r.v0 = 'USER' AND roles.role = 'ADMIN'))
@@ -31,3 +36,12 @@ STABLE
 LEAKPROOF
 PARALLEL SAFE;
 `
+
+func init() {
+	migrationFuncs[4] = func(schemaName, tableName string, tx *sql.Tx) error {
+		if _, err := tx.Exec(fmt.Sprintf(hasAccessFunction, schemaName)); err != nil {
+			return err
+		}
+		return nil
+	}
+}
